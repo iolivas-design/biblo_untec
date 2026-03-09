@@ -1,0 +1,12 @@
+# Ignorar carpetas de build y configuración
+/target/
+/.github/
+
+# Ignorar archivo de configuración de base de datos
+src/main/resources/db.properties
+
+# Ignorar archivos temporales y de sistema
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
