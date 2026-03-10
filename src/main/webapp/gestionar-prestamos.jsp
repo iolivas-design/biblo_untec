@@ -1,59 +1,92 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Gestionar Préstamos - Biblioteca Digital UNTEC</title>
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
         <h1>📖 Gestión de Préstamos</h1>
         
         <div class="navbar">
             <a href="libros">← Volver al Catálogo</a>
-            <a href="logout.jsp" class="logout">Cerrar Sesión</a>
+            <a href="logout.jsp" class="btn-logout">Cerrar Sesión</a>
         </div>
 
         <c:if test="${not empty exitoso}">
-            <div class="success">${exitoso}</div>
+            <div class="alert alert-success">${exitoso}</div>
         </c:if>
 
         <c:if test="${not empty error}">
-            <div class="error">${error}</div>
+            <div class="alert alert-danger">${error}</div>
         </c:if>
 
-        <!-- Formulario para Asignar Préstamo -->
+        <!-- SOLICITUDES PENDIENTES -->
+        <div class="info-section">
+            <h2>⏳ Solicitudes Pendientes de Aprobación</h2>
+            <c:choose>
+                <c:when test="${not empty solicitudesPendientes}">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Libro</th>
+                                <th>Fecha Solicitud</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="s" items="${solicitudesPendientes}">
+                                <tr>
+                                    <td>${s.nombreUsuario}</td>
+                                    <td>${s.tituloLibro}</td>
+                                    <td>${s.fechaPrestamo}</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <form action="gestionar-prestamos" method="post" style="display: inline;">
+                                                <input type="hidden" name="accion" value="aprobarsolicitud">
+                                                <input type="hidden" name="idPrestamo" value="${s.idPrestamo}">
+                                                <input type="hidden" name="idLibro" value="${s.idLibro}">
+                                                <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 0.85rem;">Aprobar</button>
+                                            </form>
+                                            <form action="gestionar-prestamos" method="post" style="display: inline;">
+                                                <input type="hidden" name="accion" value="rechazarsolicitud">
+                                                <input type="hidden" name="idPrestamo" value="${s.idPrestamo}">
+                                                <input type="hidden" name="idLibro" value="${s.idLibro}">
+                                                <button type="submit" class="btn btn-danger" style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('¿Rechazar esta solicitud?');">Rechazar</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:when>
+                <c:otherwise>
+                    <p class="empty-message">No hay solicitudes pendientes</p>
+                </c:otherwise>
+            </c:choose>
+        </div>
         <div class="info-section">
             <h2>Asignar Nuevo Préstamo</h2>
-            <form action="gestionar-prestamos" method="post" style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+            <form action="gestionar-prestamos" method="post" style="background-color: rgba(60, 60, 60, 0.5); padding: 20px; border-radius: 5px; margin-bottom: 30px; border: 1px solid #555;">
                 <input type="hidden" name="accion" value="asignar">
-                
-                <div style="margin-bottom: 15px;">
-                    <label for="usuarioSelect" style="display: block; font-weight: bold; margin-bottom: 5px;">Seleccionar Usuario:</label>
-                    <select id="usuarioSelect" name="idUsuario" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <div class="mb-3">
+                    <label for="usuarioSelect" class="form-label fw-bold">Seleccionar Usuario:</label>
+                    <select id="usuarioSelect" name="idUsuario" required class="form-select">
                         <option value="">-- Selecciona un usuario --</option>
                         <c:forEach var="u" items="${usuarios}">
                             <option value="${u.idUsuario}">${u.nombre} (${u.email})</option>
                         </c:forEach>
                     </select>
                 </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label for="libroSelect" style="display: block; font-weight: bold; margin-bottom: 5px;">Seleccionar Libro Disponible:</label>
-                    <select id="libroSelect" name="idLibro" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                <div class="mb-3">
+                    <label for="libroSelect" class="form-label fw-bold">Seleccionar Libro Disponible:</label>
+                    <select id="libroSelect" name="idLibro" required class="form-select">
                         <option value="">-- Selecciona un libro disponible --</option>
                         <c:forEach var="l" items="${libros}">
                             <c:if test="${l.disponible}">
-                                <option value="${l.idLibro}">${l.titulo} - ${l.autor} (${l.genero})</option>
+                                <option value="${l.idLibro}" ${idLibroSeleccionado == l.idLibro.toString() ? 'selected' : ''}>${l.titulo} - ${l.autor} (${l.genero})</option>
                             </c:if>
                         </c:forEach>
                     </select>
                 </div>
-
-                <button type="submit" style="padding: 10px 20px; background-color: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#764ba2'" onmouseout="this.style.backgroundColor='#667eea'">Asignar Préstamo</button>
+                <button type="submit" class="btn btn-primary fw-bold">Asignar Préstamo</button>
             </form>
         </div>
 
@@ -62,7 +95,7 @@
             <h2>Préstamos Activos del Sistema</h2>
             <c:choose>
                 <c:when test="${not empty prestamosActivos}">
-                    <table>
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Usuario</th>
@@ -78,15 +111,13 @@
                                     <td>${p.tituloLibro}</td>
                                     <td>${p.fechaPrestamo}</td>
                                     <td>
-                                        <div class="action-links">
-                                            <form action="gestionar-prestamos" method="post">
-                                                <input type="hidden" name="accion" value="devolver">
-                                                <input type="hidden" name="idPrestamo" value="${p.idPrestamo}">
-                                                <input type="hidden" name="idLibro" value="${p.idLibro}">
-                                                <input type="hidden" name="idUsuario" value="${p.idUsuario}">
-                                                <button type="submit" onclick="return confirm('¿Registrar devolución?');">Registrar Devolución</button>
-                                            </form>
-                                        </div>
+                                        <form action="gestionar-prestamos" method="post">
+                                            <input type="hidden" name="accion" value="devolver">
+                                            <input type="hidden" name="idPrestamo" value="${p.idPrestamo}">
+                                            <input type="hidden" name="idLibro" value="${p.idLibro}">
+                                            <input type="hidden" name="idUsuario" value="${p.idUsuario}">
+                                            <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('¿Registrar devolución?');">Registrar Devolución</button>
+                                        </form>
                                     </td>
                                 </tr>
                             </c:forEach>
@@ -103,8 +134,8 @@
         <c:if test="${not empty prestamos}">
             <div class="info-section">
                 <h2>Historial Completo del Usuario</h2>
-                <a href="gestionar-prestamos" style="padding: 8px 15px; background-color: #95a5a6; color: white; text-decoration: none; border-radius: 5px; display: inline-block; margin-bottom: 15px;">← Ver todos los préstamos</a>
-                <table>
+                <a href="gestionar-prestamos" class="btn btn-secondary mb-3">← Ver todos los préstamos</a>
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Usuario</th>
@@ -134,10 +165,10 @@
                                 <td>
                                     <c:choose>
                                         <c:when test="${empty p.fechaDevolucion}">
-                                            <span class="estado-activo">EN PRÉSTAMO</span>
+                                            <span class="badge bg-warning">EN PRÉSTAMO</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="estado-devuelto">DEVUELTO</span>
+                                            <span class="badge bg-success">DEVUELTO</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -148,7 +179,7 @@
                                             <input type="hidden" name="idPrestamo" value="${p.idPrestamo}">
                                             <input type="hidden" name="idLibro" value="${p.idLibro}">
                                             <input type="hidden" name="idUsuario" value="${p.idUsuario}">
-                                            <button type="submit" style="padding: 6px 12px; background-color: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer;" onclick="return confirm('¿Registrar devolución?');">Devolver</button>
+                                            <button type="submit" class="btn btn-success" style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('¿Registrar devolución?');">Devolver</button>
                                         </form>
                                     </c:if>
                                 </td>
@@ -158,6 +189,4 @@
                 </table>
             </div>
         </c:if>
-    </div>
-</body>
-</html>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>

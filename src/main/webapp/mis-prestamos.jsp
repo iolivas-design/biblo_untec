@@ -1,27 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Mis Préstamos - Biblioteca Digital UNTEC</title>
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
         <h1>📚 Mi Historial de Préstamos</h1>
         
         <div class="navbar">
             <a href="libros">← Volver al Catálogo</a>
-            <a href="logout.jsp" style="background-color: #e74c3c;">Cerrar Sesión</a>
+            <a href="logout.jsp" class="btn-logout">Cerrar Sesión</a>
         </div>
 
         <div class="info-section">
             <h2>Historial Completo de Préstamos</h2>
             <c:choose>
                 <c:when test="${not empty prestamos}">
-                    <table>
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th>Libro</th>
@@ -48,10 +39,10 @@
                                     <td>
                                         <c:choose>
                                             <c:when test="${empty p.fechaDevolucion}">
-                                                <span class="estado-activo">EN PRÉSTAMO</span>
+                                                <span class="badge bg-warning">EN PRÉSTAMO</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <span class="estado-devuelto">DEVUELTO</span>
+                                                <span class="badge bg-success">DEVUELTO</span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
@@ -65,6 +56,4 @@
                 </c:otherwise>
             </c:choose>
         </div>
-    </div>
-</body>
-</html>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>

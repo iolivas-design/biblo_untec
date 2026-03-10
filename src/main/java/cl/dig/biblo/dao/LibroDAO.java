@@ -14,13 +14,19 @@ public class LibroDAO {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                lista.add(new Libro(
+                Libro libro = new Libro(
                     rs.getInt("id_libro"),
                     rs.getString("titulo"),
                     rs.getString("autor"),
                     rs.getString("genero"),
                     rs.getBoolean("disponible")
-                ));
+                );
+                try {
+                    libro.setEstado(rs.getString("estado"));
+                } catch (SQLException e) {
+                    libro.setEstado(rs.getBoolean("disponible") ? "disponible" : "en_prestamo");
+                }
+                lista.add(libro);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -58,6 +64,11 @@ public class LibroDAO {
                         rs.getString("genero"),
                         rs.getBoolean("disponible")
                     );
+                    try {
+                        l.setEstado(rs.getString("estado"));
+                    } catch (SQLException e) {
+                        l.setEstado(rs.getBoolean("disponible") ? "disponible" : "en_prestamo");
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -94,6 +105,20 @@ public class LibroDAO {
         }
     }
 
+    public boolean actualizarEstado(int idLibro, String estado) {
+        String sql = "UPDATE libros SET estado = ?, disponible = ? WHERE id_libro = ?";
+        try (Connection conn = ConexionBD.obtenerConexion();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, estado);
+            ps.setBoolean(2, "disponible".equals(estado));
+            ps.setInt(3, idLibro);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public List<Libro> buscarPorCriterio(String criterio, String valor) {
         List<Libro> lista = new ArrayList<>();
         String sql = "SELECT * FROM libros WHERE " + criterio + " LIKE ?";
@@ -102,13 +127,19 @@ public class LibroDAO {
             ps.setString(1, "%" + valor + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    lista.add(new Libro(
+                    Libro libro = new Libro(
                         rs.getInt("id_libro"),
                         rs.getString("titulo"),
                         rs.getString("autor"),
                         rs.getString("genero"),
                         rs.getBoolean("disponible")
-                    ));
+                    );
+                    try {
+                        libro.setEstado(rs.getString("estado"));
+                    } catch (SQLException e) {
+                        libro.setEstado(rs.getBoolean("disponible") ? "disponible" : "en_prestamo");
+                    }
+                    lista.add(libro);
                 }
             }
         } catch (SQLException e) {

@@ -59,11 +59,18 @@ public class GestionarPrestamosServlet extends HttpServlet {
         } else {
             // Ver todos los préstamos activos y cargar formulario de asignación
             List<Prestamo> prestamosActivos = prestamoDAO.listarTodosPrestamosActivos();
+            List<Prestamo> solicitudesPendientes = prestamoDAO.listarSolicitudesPendientes();
             List<Usuario> usuarios = usuarioDAO.listarTodos();
             List<Libro> libros = libroDAO.listarTodos();
             request.setAttribute("prestamosActivos", prestamosActivos);
+            request.setAttribute("solicitudesPendientes", solicitudesPendientes);
             request.setAttribute("usuarios", usuarios);
             request.setAttribute("libros", libros);
+            // Preseleccionar libro si viene desde el catálogo
+            String idLibroParam = request.getParameter("idLibro");
+            if (idLibroParam != null && !idLibroParam.isEmpty()) {
+                request.setAttribute("idLibroSeleccionado", idLibroParam);
+            }
             request.getRequestDispatcher("gestionar-prestamos.jsp").forward(request, response);
         }
     }
@@ -102,9 +109,71 @@ public class GestionarPrestamosServlet extends HttpServlet {
                 request.setAttribute("error", "Datos inválidos");
             }
             
-            // Recargar formulario con lista de usuarios y libros
+            // Recargar formulario con lista de usuarios, libros y préstamos activos actualizados
             List<Usuario> usuarios = usuarioDAO.listarTodos();
             List<Libro> libros = libroDAO.listarTodos();
+            List<Prestamo> prestamosActivos = prestamoDAO.listarTodosPrestamosActivos();
+            List<Prestamo> solicitudesPendientes = prestamoDAO.listarSolicitudesPendientes();
+            request.setAttribute("usuarios", usuarios);
+            request.setAttribute("libros", libros);
+            request.setAttribute("prestamosActivos", prestamosActivos);
+            request.setAttribute("solicitudesPendientes", solicitudesPendientes);
+            request.getRequestDispatcher("gestionar-prestamos.jsp").forward(request, response);
+        } else if ("aprobarsolicitud".equals(accion)) {
+            String idPrestamoStr = request.getParameter("idPrestamo");
+            String idLibroStr = request.getParameter("idLibro");
+
+            try {
+                int idPrestamo = Integer.parseInt(idPrestamoStr);
+                int idLibro = Integer.parseInt(idLibroStr);
+
+                boolean resultado = prestamoDAO.aprobarSolicitud(idPrestamo, idLibro);
+
+                if (resultado) {
+                    request.setAttribute("exitoso", "Solicitud aprobada. Préstamo asignado correctamente");
+                } else {
+                    request.setAttribute("error", "Error al aprobar la solicitud");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Datos inválidos");
+            }
+
+            // Recargar con solicitudes actualizadas
+            List<Prestamo> prestamosActivos = prestamoDAO.listarTodosPrestamosActivos();
+            List<Prestamo> solicitudesPendientes = prestamoDAO.listarSolicitudesPendientes();
+            List<Usuario> usuarios = usuarioDAO.listarTodos();
+            List<Libro> libros = libroDAO.listarTodos();
+            request.setAttribute("prestamosActivos", prestamosActivos);
+            request.setAttribute("solicitudesPendientes", solicitudesPendientes);
+            request.setAttribute("usuarios", usuarios);
+            request.setAttribute("libros", libros);
+            request.getRequestDispatcher("gestionar-prestamos.jsp").forward(request, response);
+        } else if ("rechazarsolicitud".equals(accion)) {
+            String idPrestamoStr = request.getParameter("idPrestamo");
+            String idLibroStr = request.getParameter("idLibro");
+
+            try {
+                int idPrestamo = Integer.parseInt(idPrestamoStr);
+                int idLibro = Integer.parseInt(idLibroStr);
+
+                boolean resultado = prestamoDAO.rechazarSolicitud(idPrestamo, idLibro);
+
+                if (resultado) {
+                    request.setAttribute("exitoso", "Solicitud rechazada");
+                } else {
+                    request.setAttribute("error", "Error al rechazar la solicitud");
+                }
+            } catch (NumberFormatException e) {
+                request.setAttribute("error", "Datos inválidos");
+            }
+
+            // Recargar con solicitudes actualizadas
+            List<Prestamo> prestamosActivos = prestamoDAO.listarTodosPrestamosActivos();
+            List<Prestamo> solicitudesPendientes = prestamoDAO.listarSolicitudesPendientes();
+            List<Usuario> usuarios = usuarioDAO.listarTodos();
+            List<Libro> libros = libroDAO.listarTodos();
+            request.setAttribute("prestamosActivos", prestamosActivos);
+            request.setAttribute("solicitudesPendientes", solicitudesPendientes);
             request.setAttribute("usuarios", usuarios);
             request.setAttribute("libros", libros);
             request.getRequestDispatcher("gestionar-prestamos.jsp").forward(request, response);

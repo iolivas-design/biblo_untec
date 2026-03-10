@@ -1,41 +1,33 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Formulario Libro - Biblioteca Digital UNTEC</title>
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
         <h1><c:out value="${libro != null ? 'Editar' : 'Registrar'}" /> Libro</h1>
-        <form action="libros" method="post">
-            <input type="hidden" name="idLibro" value="${libro.idLibro}">
-            <table>
-                <tr>
-                    <td><label for="titulo">Título:</label></td>
-                    <td><input type="text" id="titulo" name="titulo" value="${libro.titulo}" required></td>
-                </tr>
-                <tr>
-                    <td><label for="autor">Autor:</label></td>
-                    <td><input type="text" id="autor" name="autor" value="${libro.autor}" required></td>
-                </tr>
-                <tr>
-                    <td><label for="genero">Género:</label></td>
-                    <td><input type="text" id="genero" name="genero" value="${libro.genero}"></td>
-                </tr>
+        
+        <div style="max-width: 600px; margin: 0 auto;">
+            <form action="libros" method="post">
+                <input type="hidden" name="idLibro" value="${libro.idLibro}">
+                
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Título:</label>
+                    <input type="text" id="titulo" name="titulo" value="${libro.titulo}" required class="form-control" placeholder="Ingrese el título del libro">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="autor" class="form-label">Autor:</label>
+                    <input type="text" id="autor" name="autor" value="${libro.autor}" required class="form-control" placeholder="Ingrese el nombre del autor">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="genero" class="form-label">Género:</label>
+                    <input type="text" id="genero" name="genero" value="${libro.genero}" class="form-control" placeholder="Ingrese el género del libro">
+                </div>
+                
                 <input type="hidden" name="disponible" value="${libro.idLibro != null ? libro.disponible : true}">
-                <tr>
-                    <td></td>
-                    <td>
-                        <button type="submit">Guardar</button>
-                        <a href="libros">Cancelar</a>
-                    </td>
-                </tr>
-            </table>
-        </form>
-    </div>
-</body>
-</html>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a href="libros" class="btn btn-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>

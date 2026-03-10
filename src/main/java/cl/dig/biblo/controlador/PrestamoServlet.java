@@ -31,12 +31,12 @@ public class PrestamoServlet extends HttpServlet {
         
         if (idLibroStr != null) {
             int idLibro = Integer.parseInt(idLibroStr);
-            boolean exito = prestamoDAO.registrar(usuario.getIdUsuario(), idLibro);
+            boolean exito = prestamoDAO.solicitarPrestamo(usuario.getIdUsuario(), idLibro);
 
             if (exito) {
-                request.setAttribute("mensaje", "Préstamo registrado");
+                request.setAttribute("mensaje", "Solicitud enviada. Pendiente de aprobación del bibliotecario");
             } else {
-                request.setAttribute("error", "Error al procesar");
+                request.setAttribute("error", "Error al procesar la solicitud");
             }
         }
 

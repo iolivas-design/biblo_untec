@@ -6,6 +6,7 @@ public class Libro {
     private String autor;
     private String genero;
     private boolean disponible;
+    private String estado; // disponible, solicitado, en_prestamo
 
     public Libro() {}
 
@@ -15,6 +16,7 @@ public class Libro {
         this.autor = autor;
         this.genero = genero;
         this.disponible = disponible;
+        this.estado = disponible ? "disponible" : "en_prestamo";
     }
 
     public int getIdLibro() { return idLibro; }
@@ -27,4 +29,6 @@ public class Libro {
     public void setGenero(String genero) { this.genero = genero; }
     public boolean isDisponible() { return disponible; }
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

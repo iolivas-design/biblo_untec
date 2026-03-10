@@ -10,6 +10,7 @@ public class Prestamo {
     private Date fechaDevolucion;
     private String nombreUsuario;
     private String tituloLibro;
+    private String estado; // SOLICITUD, APROBADO, RECHAZADO
 
     public Prestamo() {}
 
@@ -27,4 +28,6 @@ public class Prestamo {
     public void setNombreUsuario(String nombreUsuario) { this.nombreUsuario = nombreUsuario; }
     public String getTituloLibro() { return tituloLibro; }
     public void setTituloLibro(String tituloLibro) { this.tituloLibro = tituloLibro; }
+    public String getEstado() { return estado; }
+    public void setEstado(String estado) { this.estado = estado; }
 }

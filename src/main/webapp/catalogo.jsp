@@ -1,15 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Catálogo - Biblioteca Digital UNTEC</title>
-    <!-- Bootstrap CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
+<%@ taglib uri="jakarta.tags.functions" prefix="fn" %>
+<%@ include file="/WEB-INF/jspf/header.jspf" %>
         <h1>Catálogo de Libros</h1>
         
         <div class="user-info">
@@ -34,7 +26,7 @@
         </div>
         
         <c:if test="${not empty error}">
-            <p class="error"><c:out value="${error}"/></p>
+            <div class="error"><c:out value="${error}"/></div>
         </c:if>
 
         <!-- Datalists para autocompletar -->
@@ -56,16 +48,27 @@
         <!-- Fin datalists -->
 
         <!-- Formulario de búsqueda -->
-        <form action="catalogo" method="get" style="margin-bottom: 25px; display: flex; gap: 10px; align-items: center;">
-            <label for="criterio" style="font-weight: bold;">Buscar por:</label>
-            <select name="criterio" id="criterio" style="padding: 8px; border-radius: 4px;">
-                <option value="titulo">Título</option>
-                <option value="autor">Autor</option>
-                <option value="genero">Género</option>
+        <form action="libros" method="get" class="d-flex align-items-center mb-3 gap-2 flex-wrap">
+            <label for="criterio" class="fw-bold mb-0">Buscar por:</label>
+            <select name="criterio" id="criterio" class="form-select w-auto">
+                <option value="titulo" ${param.criterio == 'titulo' ? 'selected' : ''}>Título</option>
+                <option value="autor"  ${param.criterio == 'autor'  ? 'selected' : ''}>Autor</option>
+                <option value="genero" ${param.criterio == 'genero' ? 'selected' : ''}>Género</option>
             </select>
-            <input type="text" name="valor" id="busqueda" list="datalist-titulo" placeholder="Ingrese búsqueda..." style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; min-width: 200px;">
-            <button type="submit" style="padding: 8px 16px; background-color: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Buscar</button>
+            <input type="text" name="valor" id="busqueda" list="datalist-titulo"
+                   placeholder="Ingrese búsqueda..." class="form-control w-auto"
+                   style="min-width: 200px;" value="${param.valor}">
+            <button type="submit" class="btn btn-primary fw-bold">Buscar</button>
+            <c:if test="${not empty param.valor}">
+                <a href="libros" class="btn btn-outline-secondary">✕ Limpiar</a>
+            </c:if>
         </form>
+        <c:if test="${not empty param.valor}">
+            <p class="text-muted mb-2">
+                Mostrando resultados para <strong><c:out value="${param.criterio}"/>: "<c:out value="${param.valor}"/>"</strong>
+                — ${fn:length(libros)} resultado(s).
+            </p>
+        </c:if>
         <!-- Fin formulario de búsqueda -->
 
         <script>
@@ -81,7 +84,7 @@
         });
         </script>
 
-        <table>
+        <table class="table table-striped">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -101,28 +104,35 @@
                         <td>${l.genero}</td>
                         <td>
                             <c:choose>
-                                <c:when test="${l.disponible}">
-                                    <span class="available">Disponible</span>
+                                <c:when test="${l.estado == 'disponible'}">
+                                    <span class="badge bg-success">Disponible</span>
+                                </c:when>
+                                <c:when test="${l.estado == 'solicitado'}">
+                                    <span class="badge bg-warning">Solicitado</span>
+                                </c:when>
+                                <c:when test="${l.estado == 'en_prestamo'}">
+                                    <span class="badge bg-danger">En Préstamo</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="unavailable">En préstamo</span>
+                                    <span class="badge bg-secondary">${l.estado}</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>
                         <td>
-                            <div class="action-links">
+                            <div class="d-flex gap-2" style="flex-wrap: wrap;">
                                 <c:choose>
                                     <c:when test="${sessionScope.tipoUsuario == 'bibliotecario'}">
                                         <!-- Opciones para Bibliotecario -->
-                                        <c:if test="${l.disponible}">
-                                            <a href="libros?accion=editar&id=${l.idLibro}">Editar</a>
+                                        <c:if test="${l.estado == 'disponible'}">
+                                            <a href="libros?accion=editar&id=${l.idLibro}" class="btn btn-sm btn-warning" style="padding: 5px 10px; font-size: 0.85rem;">Editar</a>
+                                            <a href="gestionar-prestamos?idLibro=${l.idLibro}" class="btn btn-sm btn-primary" style="padding: 5px 10px; font-size: 0.85rem;">Asignar</a>
                                         </c:if>
-                                        <a href="libros?accion=eliminar&id=${l.idLibro}" class="btn-delete" onclick="return confirm('¿Seguro que deseas eliminar este libro?');">Eliminar</a>
+                                        <a href="libros?accion=eliminar&id=${l.idLibro}" class="btn btn-sm btn-danger" style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('¿Seguro que deseas eliminar este libro?');">Eliminar</a>
                                     </c:when>
                                     <c:otherwise>
                                         <!-- Opciones para Usuario General -->
-                                        <c:if test="${l.disponible}">
-                                            <a href="solicitarPrestamo?id=${l.idLibro}">Solicitar Préstamo</a>
+                                        <c:if test="${l.estado == 'disponible'}">
+                                            <a href="solicitarPrestamo?id=${l.idLibro}" class="btn btn-sm btn-primary" style="padding: 5px 10px; font-size: 0.85rem;">Solicitar</a>
                                         </c:if>
                                     </c:otherwise>
                                 </c:choose>
@@ -132,6 +142,4 @@
                 </c:forEach>
             </tbody>
         </table>
-    </div>
-</body>
-</html>
+<%@ include file="/WEB-INF/jspf/footer.jspf" %>
