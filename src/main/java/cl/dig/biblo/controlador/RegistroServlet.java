@@ -8,11 +8,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/**
+ * Servlet que gestiona el registro de nuevos usuarios en la biblioteca digital.
+ * Valida la información del usuario y crea una nueva cuenta de tipo "general".
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 @WebServlet("/registro")
 public class RegistroServlet extends HttpServlet {
     
     private UsuarioDAO usuarioDAO = new UsuarioDAO();
 
+    /**
+     * Procesa las solicitudes POST del formulario de registro.
+     * Valida que los datos sean correctos, que el email no esté registrado,
+     * y que las contraseñas coincidan. Si todo es válido, crea una nueva cuenta.
+     * 
+     * @param request el objeto HttpServletRequest que contiene los datos de registro
+     * @param response el objeto HttpServletResponse para redirigir al usuario
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */ 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {

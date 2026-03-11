@@ -68,7 +68,7 @@
                 <input type="hidden" name="accion" value="asignar">
                 <div class="mb-3">
                     <label for="usuarioSelect" class="form-label fw-bold">Seleccionar Usuario:</label>
-                    <select id="usuarioSelect" name="idUsuario" required class="form-select">
+                    <select id="usuarioSelect" name="idUsuario" required class="form-select tom-select">
                         <option value="">-- Selecciona un usuario --</option>
                         <c:forEach var="u" items="${usuarios}">
                             <option value="${u.idUsuario}">${u.nombre} (${u.email})</option>
@@ -77,7 +77,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="libroSelect" class="form-label fw-bold">Seleccionar Libro Disponible:</label>
-                    <select id="libroSelect" name="idLibro" required class="form-select">
+                    <select id="libroSelect" name="idLibro" required class="form-select tom-select">
                         <option value="">-- Selecciona un libro disponible --</option>
                         <c:forEach var="l" items="${libros}">
                             <c:if test="${l.disponible}">
@@ -89,6 +89,27 @@
                 <button type="submit" class="btn btn-primary fw-bold">Asignar Préstamo</button>
             </form>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof TomSelect !== 'undefined') {
+                    new TomSelect('#usuarioSelect', {
+                        placeholder: 'Buscar usuario...',
+                        plugins: {
+                            dropdown_input: {}
+                        },
+                        maxOptions: null
+                    });
+                    new TomSelect('#libroSelect', {
+                        placeholder: 'Buscar libro...',
+                        plugins: {
+                            dropdown_input: {}
+                        },
+                        maxOptions: null
+                    });
+                }
+            });
+        </script>
 
         <!-- Préstamos Activos -->
         <div class="info-section">

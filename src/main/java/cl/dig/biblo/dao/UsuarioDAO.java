@@ -6,8 +6,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Clase DAO (Data Access Object) para gestionar operaciones de base de datos 
+ * relacionadas con la entidad Usuario.
+ * Proporciona métodos para validar, registrar y buscar usuarios.
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 public class UsuarioDAO {
 
+    /**
+     * Valida las credenciales de un usuario consultando la base de datos.
+     * Busca un usuario por email y verifica su contraseña.
+     * 
+     * @param email el correo electrónico del usuario
+     * @param password la contraseña del usuario
+     * @return un objeto Usuario si las credenciales son válidas, null en caso contrario
+     */
     public Usuario validarUsuario(String email, String password) {
         Usuario usuario = null;
         String sql = "SELECT id_usuario, nombre, email, password, tipo_usuario FROM usuarios WHERE email = ? AND password = ?";
@@ -34,6 +50,14 @@ public class UsuarioDAO {
         return usuario;
     }
 
+    /**
+     * Registra un nuevo usuario en la base de datos con tipo "general".
+     * 
+     * @param nombre el nombre completo del usuario
+     * @param email el correo electrónico del usuario
+     * @param password la contraseña del usuario
+     * @return true si el registro fue exitoso, false en caso contrario
+     */
     public boolean registrarUsuario(String nombre, String email, String password) {
         String sql = "INSERT INTO usuarios (nombre, email, password, tipo_usuario) VALUES (?, ?, ?, 'general')";
 
@@ -52,6 +76,12 @@ public class UsuarioDAO {
         }
     }
 
+    /**
+     * Verifica si un correo electrónico ya existe en la base de datos.
+     * 
+     * @param email el correo a verificar
+     * @return true si el email ya existe, false en caso contrario
+     */
     public boolean emailExiste(String email) {
         String sql = "SELECT 1 FROM usuarios WHERE email = ?";
 
@@ -69,6 +99,11 @@ public class UsuarioDAO {
         }
     }
 
+    /**
+     * Lista todos los usuarios de tipo "general" de la base de datos.
+     * 
+     * @return una lista de usuarios generales ordenados por nombre
+     */
     public java.util.List<Usuario> listarTodos() {
         java.util.List<Usuario> lista = new java.util.ArrayList<>();
         String sql = "SELECT id_usuario, nombre, email, tipo_usuario FROM usuarios WHERE tipo_usuario = 'general' ORDER BY nombre";

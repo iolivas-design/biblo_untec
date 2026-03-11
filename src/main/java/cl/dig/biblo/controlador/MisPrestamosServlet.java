@@ -12,10 +12,28 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet que muestra el historial de préstamos de un usuario.
+ * Usuarios regulares ven solo su historial personal.
+ * Bibliotecarios son redirigidos a la página de gestión de préstamos.
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 @WebServlet("/mis-prestamos")
 public class MisPrestamosServlet extends HttpServlet {
     private PrestamoDAO prestamoDAO = new PrestamoDAO();
 
+    /**
+     * Procesa las solicitudes GET para mostrar el historial de préstamos del usuario.
+     * Requiere autenticación. Los usuarios regulares ven su historial completo.
+     * Los bibliotecarios son redirigidos a la página de gestión de préstamos.
+     * 
+     * @param request el objeto HttpServletRequest con la sesión del usuario
+     * @param response el objeto HttpServletResponse para redirigir o forward
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */ 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {

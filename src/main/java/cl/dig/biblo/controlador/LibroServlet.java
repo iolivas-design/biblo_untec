@@ -10,10 +10,27 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet que gestiona las operaciones relacionadas con libros en la biblioteca digital.
+ * Proporciona funcionalidad para listar, buscar, editar y eliminar libros.
+ * Accesible por usuarios bibliotecarios para la administración del catálogo.
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 @WebServlet("/libros")
 public class LibroServlet extends HttpServlet {
     private LibroDAO libroDAO = new LibroDAO();
 
+    /**
+     * Procesa las solicitudes GET para listar y buscar libros.
+     * Soporta búsqueda por criterio (título, autor, género), eliminación y edición de libros.
+     * 
+     * @param request el objeto HttpServletRequest que contiene los parámetros de búsqueda/acción
+     * @param response el objeto HttpServletResponse para redirigir al usuario
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -50,6 +67,15 @@ public class LibroServlet extends HttpServlet {
         request.getRequestDispatcher("catalogo.jsp").forward(request, response);
     }
 
+    /**
+     * Procesa las solicitudes POST para crear o actualizar libros.
+     * Si el ID está vacío, crea un nuevo libro. Si tiene ID, actualiza el existente.
+     * 
+     * @param request el objeto HttpServletRequest que contiene los datos del libro
+     * @param response el objeto HttpServletResponse para redirigir al usuario
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {

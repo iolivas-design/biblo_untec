@@ -6,8 +6,26 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Clase DAO (Data Access Object) para gestionar operaciones de base de datos 
+ * relacionadas con la entidad Prestamo.
+ * Proporciona métodos para registrar, devolver, aprobar, rechazar solicitudes de préstamo
+ * y listar préstamos en diversos estados.
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 public class PrestamoDAO {
 
+    /**
+     * Registra un nuevo préstamo en la base de datos.
+     * Crea un registro de préstamo y marca el libro como no disponible.
+     * Utiliza transacción para asegurar consistencia.
+     * 
+     * @param idUsuario el ID del usuario que realiza el préstamo
+     * @param idLibro el ID del libro a prestar
+     * @return true si el registro fue exitoso, false en caso contrario
+     */
     public boolean registrar(int idUsuario, int idLibro) {
         String sqlIns = "INSERT INTO prestamos (id_usuario, id_libro, fecha_prestamo) VALUES (?, ?, ?)";
         String sqlUpd = "UPDATE libros SET disponible = false WHERE id_libro = ?";
@@ -32,8 +50,16 @@ public class PrestamoDAO {
         } catch (SQLException e) { return false; }
     }
 
+    /**
+     * Devuelve un préstamo con validación de que el usuario y libro coincidan.
+     * Actualiza la fecha de devolución y marca el libro como disponible.
+     * Utiliza transacción para asegurar consistencia.
+     * 
+     * @param idLibro el ID del libro a devolver
+     * @param idUsuario el ID del usuario que devuelve el libro
+     * @return true si la devolución fue exitosa, false en caso contrario
+     */
     public boolean devolverConValidacion(int idLibro, int idUsuario) {
-        // La validación ocurre aquí: el WHERE exige que coincidan Libro, Usuario y que no esté devuelto
         String sqlPre = "UPDATE prestamos SET fecha_devolucion = CURRENT_DATE " +
                         "WHERE id_libro = ? AND id_usuario = ? AND fecha_devolucion IS NULL";
         String sqlVin = "UPDATE libros SET estado = 'disponible', disponible = true WHERE id_libro = ?";
@@ -60,6 +86,13 @@ public class PrestamoDAO {
         } catch (SQLException e) { return false; }
     }
 
+    /**
+     * Lista los préstamos activos (no devueltos) de un usuario específico.
+     * Retorna solo préstamos sin fecha de devolución.
+     * 
+     * @param idUsuario el ID del usuario
+     * @return una lista de préstamos activos del usuario
+     */
     public List<Prestamo> listarPorUsuario(int idUsuario) {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT p.*, l.titulo FROM prestamos p " +
@@ -80,6 +113,13 @@ public class PrestamoDAO {
         return lista;
     }
 
+    /**
+     * Lista el historial completo de préstamos de un usuario.
+     * Incluye préstamos activos y completados, ordenados por fecha descendente.
+     * 
+     * @param idUsuario el ID del usuario
+     * @return una lista de todos los préstamos del usuario ordenados por fecha
+     */
     public List<Prestamo> listarHistorialCompletoPorUsuario(int idUsuario) {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT p.id_prestamo, p.id_usuario, p.id_libro, p.fecha_prestamo, p.fecha_devolucion, " +
@@ -107,6 +147,13 @@ public class PrestamoDAO {
         return lista;
     }
 
+    /**
+     * Lista solo los préstamos activos (sin devolución) de un usuario específico.
+     * Útil para mostrar los libros que el usuario actualmente tiene en préstamo.
+     * 
+     * @param idUsuario el ID del usuario
+     * @return una lista de préstamos activos del usuario
+     */
     public List<Prestamo> listarPrestamosActivosPorUsuario(int idUsuario) {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT p.id_prestamo, p.id_usuario, p.id_libro, p.fecha_prestamo, p.fecha_devolucion, " +
@@ -134,6 +181,12 @@ public class PrestamoDAO {
         return lista;
     }
 
+    /**
+     * Lista todos los préstamos actuales (sin devolver) de todos los usuarios.
+     * Usada por el bibliotecario para gestionar los préstamos activos.
+     * 
+     * @return una lista de todos los préstamos activos del sistema
+     */
     public List<Prestamo> listarTodosPrestamosActivos() {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT p.id_prestamo, p.id_usuario, p.id_libro, p.fecha_prestamo, p.fecha_devolucion, " +
@@ -160,6 +213,15 @@ public class PrestamoDAO {
         return lista;
     }
 
+    /**
+     * Asigna un préstamo de un libro a un usuario.
+     * Valida que el libro exista y esté disponible antes de asignar.
+     * Utiliza transacción para asegurar consistencia.
+     * 
+     * @param idUsuario el ID del usuario al que se asigna el préstamo
+     * @param idLibro el ID del libro a prestar
+     * @return true si la asignación fue exitosa, false si el libro no está disponible
+     */
     public boolean asignar(int idUsuario, int idLibro) {
         String sqlCheck = "SELECT disponible FROM libros WHERE id_libro = ?";
         String sqlIns = "INSERT INTO prestamos (id_usuario, id_libro, fecha_prestamo) VALUES (?, ?, ?)";
@@ -168,12 +230,11 @@ public class PrestamoDAO {
         try {
             conn = ConexionBD.obtenerConexion();
             
-            // Validar que el libro existe y está disponible
             PreparedStatement psCheck = conn.prepareStatement(sqlCheck);
             psCheck.setInt(1, idLibro);
             ResultSet rs = psCheck.executeQuery();
             if (!rs.next() || !rs.getBoolean("disponible")) {
-                return false; // Libro no existe o no está disponible
+                return false;
             }
             psCheck.close();
             
@@ -197,7 +258,15 @@ public class PrestamoDAO {
         }
     }
 
-    // Método para SOLICITUDES (marca libro como solicitado)
+    /**
+     * Registra una solicitud de préstamo de un usuario.
+     * Marca el libro como "solicitado" y crea un registro con estado SOLICITUD.
+     * El bibliotecario debe aprobar o rechazar posteriormente.
+     * 
+     * @param idUsuario el ID del usuario que solicita el préstamo
+     * @param idLibro el ID del libro solicitado
+     * @return true si la solicitud fue registrada exitosamente, false en caso contrario
+     */
     public boolean solicitarPrestamo(int idUsuario, int idLibro) {
         String sqlIns = "INSERT INTO prestamos (id_usuario, id_libro, fecha_prestamo, estado) VALUES (?, ?, ?, 'SOLICITUD')";
         String sqlUpd = "UPDATE libros SET estado = 'solicitado', disponible = false WHERE id_libro = ?";
@@ -224,7 +293,15 @@ public class PrestamoDAO {
         }
     }
 
-    // Método para APROBAR solicitud
+    /**
+     * Aprueba una solicitud de préstamo.
+     * Cambia el estado de SOLICITUD a APROBADO y actualiza el estado del libro.
+     * Utiliza transacción para asegurar consistencia.
+     * 
+     * @param idPrestamo el ID del préstamo a aprobar
+     * @param idLibro el ID del libro asociado al préstamo
+     * @return true si la aprobación fue exitosa, false en caso contrario
+     */
     public boolean aprobarSolicitud(int idPrestamo, int idLibro) {
         String sqlUpd = "UPDATE prestamos SET estado = 'APROBADO' WHERE id_prestamo = ?";
         String sqlLib = "UPDATE libros SET estado = 'en_prestamo', disponible = false WHERE id_libro = ?";
@@ -249,7 +326,15 @@ public class PrestamoDAO {
         }
     }
 
-    // Método para RECHAZAR solicitud
+    /**
+     * Rechaza una solicitud de préstamo.
+     * Cambia el estado de SOLICITUD a RECHAZADO y marca el libro como disponible.
+     * Utiliza transacción para asegurar consistencia.
+     * 
+     * @param idPrestamo el ID del préstamo a rechazar
+     * @param idLibro el ID del libro asociado al préstamo
+     * @return true si el rechazo fue exitoso, false en caso contrario
+     */
     public boolean rechazarSolicitud(int idPrestamo, int idLibro) {
         String sqlUpd = "UPDATE prestamos SET estado = 'RECHAZADO' WHERE id_prestamo = ?";
         String sqlLib = "UPDATE libros SET estado = 'disponible', disponible = true WHERE id_libro = ?";
@@ -274,7 +359,12 @@ public class PrestamoDAO {
         }
     }
 
-    // Listar solicitudes PENDIENTES para el bibliotecario
+    /**
+     * Lista todas las solicitudes de préstamo pendientes de aprobación.
+     * Son préstamos con estado SOLICITUD, ordenados por fecha ascendente.
+     * 
+     * @return una lista de solicitudes pendientes
+     */
     public List<Prestamo> listarSolicitudesPendientes() {
         List<Prestamo> lista = new ArrayList<>();
         String sql = "SELECT p.id_prestamo, p.id_usuario, p.id_libro, p.fecha_prestamo, " +

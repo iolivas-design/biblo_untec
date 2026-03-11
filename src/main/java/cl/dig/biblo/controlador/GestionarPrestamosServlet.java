@@ -15,12 +15,32 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Servlet que gestiona las operaciones de préstamo desde la perspectiva del bibliotecario.
+ * Proporciona funcionalidad para asignar préstamos, aprobar/rechazar solicitudes y ver historial.
+ * Solo accesible por usuarios con rol "bibliotecario".
+ * 
+ * @author Biblioteca Digital UNTEC
+ * @version 1.0
+ */
 @WebServlet("/gestionar-prestamos")
 public class GestionarPrestamosServlet extends HttpServlet {
     private PrestamoDAO prestamoDAO = new PrestamoDAO();
     private UsuarioDAO usuarioDAO = new UsuarioDAO();
     private LibroDAO libroDAO = new LibroDAO();
 
+    /**
+     * Procesa las solicitudes GET para mostrar pantallas de gestión de préstamos.
+     * Valida que el usuario sea bibliotecario y maneja varias acciones:
+     * - Mostrar formulario de asignación
+     * - Ver préstamos por usuario
+     * - Ver todos los préstamos activos
+     * 
+     * @param request el objeto HttpServletRequest que contiene los parámetros de acción
+     * @param response el objeto HttpServletResponse para redirigir al usuario
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */ 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
@@ -75,6 +95,16 @@ public class GestionarPrestamosServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Procesa las solicitudes POST para realizar acciones de gestión de préstamos.
+     * El bibliotecario puede: asignar préstamos, aprobar solicitudes y rechazar solicitudes.
+     * Valida que solo usuarios con rol "bibliotecario" puedan ejecutar estas acciones.
+     * 
+     * @param request el objeto HttpServletRequest que contiene la acción y datos del préstamo
+     * @param response el objeto HttpServletResponse para redirigir al usuario
+     * @throws ServletException si hay un error en la ejecución del servlet
+     * @throws IOException si hay un error de entrada/salida
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
